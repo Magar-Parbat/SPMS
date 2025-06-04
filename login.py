@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
+from admin import AdminDashboard
+import os
 
 def clear_window():
     for widget in root.winfo_children():
@@ -55,10 +57,14 @@ def login_window():
                             if saved_username == username:
                                 if role == "Student":
                                     messagebox.showinfo("Login Successful", f"Student dashboard is under development.")
+                                    return
+
                                 else:
-                                    messagebox.showinfo("Login Successful", f"Admin dashboard is under development.")
-                                return
-                # if username found i npasswords.txt but not in users.txt
+                                    clear_window()
+                                    admin_dashboard = AdminDashboard(root)  # creat an instance of AdminDashboard
+                                    return
+                                    
+                # if username found in passwords.txt but not in users.txt
                 messagebox.showerror("Login failed", "User data not found.")
 
             except Exception as e:

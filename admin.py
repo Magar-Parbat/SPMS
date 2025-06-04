@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk 
+import os 
 
 class AdminDashboard:
     def __init__(self, root):
@@ -20,7 +21,7 @@ class AdminDashboard:
 
         tk.Button(self.root, text="Manage Users", command=self.manage_users).pack(pady=10)
         tk.Button(self.root, text="Manage Courses", command=self.manage_courses).pack(pady=10)
-        tk.Button(self.root, text="Exit", command = root.quit).pack(pady=10)
+        tk.Button(self.root, text="Exit", command = self.root.quit).pack(pady=10)
     
     def clear_window(self):
         for widget in self.root.winfo_children():
@@ -60,3 +61,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = AdminDashboard(root)
     root.mainloop()
+    
