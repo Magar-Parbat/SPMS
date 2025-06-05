@@ -1,3 +1,4 @@
 Admin,Admin,Admin
 Parbat,Parbat Magar,Student
 Sayana,Sayana tamang,Student
+Susan,Susan Lama,Student
