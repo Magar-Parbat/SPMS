@@ -115,10 +115,82 @@ class AdminDashboard:
         student_tree.pack(pady=5, padx=20, fill=tk.BOTH)
 
         # Add a scrollbar for student table
+    
+        tk.Button(self.root, text="Back", command=self.manage_users).pack(pady=10)
 
     def add_users(self):
 
-        messagebox.showinfo("Info", "This feature is under development.")
+        self.clear_window()
+        self.root.geometry("600x500")
+
+        tk.Label(self.root, text="Create Account", font=("Arial", 14)).pack(pady=20)
+
+        tk.Label(self.root, text="Username:").pack(pady=5)
+        username_entry = tk.Entry(self.root)
+        username_entry.pack(pady=5)
+
+        tk.Label(self.root, text="Full Name:").pack(pady=5)
+        fullname_entry = tk.Entry(self.root)
+        fullname_entry.pack(pady=5)
+
+        tk.Label(self.root, text="Password:").pack(pady=5)
+        password_entry = tk.Entry(self.root, show="*")
+        password_entry.pack(pady=5)
+
+        tk.Label(self.root, text="Confirm Password:").pack(pady=5)
+        confirm_password_entry = tk.Entry(self.root, show="*")
+        confirm_password_entry.pack(pady=5)
+
+        tk.Label(self.root, text="Role:").pack(pady=5)
+        self.role_var = tk.StringVar(value="Student") # default role
+        tk.Radiobutton(self.root, text="Admin", variable=self.role_var, value="Admin").pack(pady=5)
+        tk.Radiobutton(self.root, text="Student", variable=self.role_var, value="Student").pack(pady=5)
+
+        def create_account():
+
+            username = username_entry.get().strip()
+            fullname = fullname_entry.get().strip()
+            password = password_entry.get().strip()
+            confirm_password = confirm_password_entry.get().strip()
+            role = self.role_var.get()
+
+            # if any field is empty
+            if not username or not fullname or not password or not confirm_password:
+                messagebox.showerror("Error", "All fields are required.")
+                return
+            
+            # if password and confirm password do not match
+            if password != confirm_password:
+                messagebox.showerror("Error", "Password do not match.")
+                return
+            
+            # if usename already exists
+            try:
+                with open("data/users.txt", "r") as file:
+                    for line in file:
+                        data = line.strip().split(",")
+                        if data[0] == username:
+                            messagebox.showerror("Error", "Username already exists.")
+                            return
+            except FileNotFoundError:
+                messagebox.showerror("Error", "Users file not found.")
+                return
+            
+            # if all checks pass, create account
+            try: 
+                with open("data/users.txt", "a") as file:
+                    file.write(f"{username},{fullname},{role}\n")
+                with open("data/passwords.txt", "a") as file:
+                    file.write(f"{username},{password}\n")
+                
+                messagebox.showinfo("Success", "Account created successfully.")
+                self.manage_users() # go back to manage users screen
+            
+            except Exception as e:
+                messagebox.showerror("Error", f"An error occurred: {e}")
+
+        tk.Button(self.root, text="Create Account", command=create_account).pack(pady=10)
+        tk.Button(self.root, text="Back", command=self.manage_users).pack(pady=10)
     
     def update_users(self):
 
