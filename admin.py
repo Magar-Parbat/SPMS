@@ -359,7 +359,6 @@ class AdminDashboard:
 
         messagebox.showinfo("Info", "This feature is under development.")
 
-
 if __name__ == "__main__":
     root = tk.Tk()
     app = AdminDashboard(root)
