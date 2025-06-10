@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk 
+from course import show_course_screen
 import os 
 
 class AdminDashboard:
@@ -357,11 +358,13 @@ class AdminDashboard:
 
     def manage_courses(self):
 
-        messagebox.showinfo("Info", "This feature is under development.")
+        self.clear_window()
+        show_course_screen(self.root, self.show_dashboard)
 
 if __name__ == "__main__":
     root = tk.Tk()
     app = AdminDashboard(root)
     root.mainloop()
+
     
     
