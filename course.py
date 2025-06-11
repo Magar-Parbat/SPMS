@@ -26,7 +26,127 @@ class CourseManager:
 
     def view_courses(self):
 
-        messagebox.showinfo("View Courses", "This feature is under development")
+        self.clear_window()
+        self.root.geometry("1000x600")
+
+        tk.Label(self.root, text="View Courses", font=("Arial", 14)).pack(pady=10)
+
+        # Columns for the treeview
+        columns = [
+            "Rank",
+            "Username",
+            "Maths",
+            "Physics",
+            "Chemistry",
+            "English",
+            "Nepali",
+            "Total",
+            "Percentage",
+            "GPA",
+            "Grade",
+        ]
+
+        self.tree = ttk.Treeview(self.root, columns=columns, show="headings", height=20)
+
+        # Configure column widths
+        col_widths = {
+            "Rank": 50,
+            "Username": 100,
+            "Maths": 70,
+            "Physics": 70,
+            "Chemistry": 70,
+            "English": 70,
+            "Nepali": 70,
+            "Total": 70,
+            "Percentage": 70,
+            "GPA": 50,
+            "Grade": 50
+        }
+
+        for col in columns:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=col_widths.get(col, 100), anchor="center")
+
+        # Load and process marks data
+        marks_data = self.load_existing_marks()
+        processed_data = []
+
+        for username, subjects in marks_data.items():
+            # Calculate total marks
+            total = 0
+            valid_subjects = 0
+            subject_scores = {}
+
+            for subject in ["Maths", "Physics", "Chemistry", "English", "Nepali"]:
+                try:
+                    score = float(subjects.get(subject, 0))
+                    total += score
+                    valid_subjects += 1
+                    subject_scores[subject] = score
+                except (ValueError, TypeError):
+                    subject_score[subject] = "N/A"
+
+            # Calculate percentage
+            percentage = (total/ (valid_subjects * 100)) * 100 if valid_subjects > 0 else 0
+
+            # calculate GPA
+            gpa = round((percentage / 100) * 4.0, 2)
+
+            # Determine grades
+            grade = self.calculate_grade(percentage)
+
+            processed_data.append({
+                "Username": username,
+                "Maths": subject_scores.get("Maths", "N/A"),
+                "Physics": subject_scores.get("Physics", "N/A"),
+                "Chemistry": subject_scores.get("Chemistry", "N/A"),
+                "English": subject_scores.get("English", "N/A"),
+                "Nepali": subject_scores.get("Nepali", "N/A"),
+                "Total": round(total, 2),
+                "Percentage": round(percentage, 2),
+                "GPA": gpa,
+                "Grade": grade
+            })
+
+        # sort by percentage for ranks
+        processed_data.sort(key=lambda x: x["Percentage"], reverse=True)
+        for i, student in enumerate(processed_data, 1):
+            student["Rank"] = i 
+
+        # Add data to Treeview
+        for student in processed_data:
+            self.tree.insert("", tk.END, values=[
+                student["Rank"],
+                student["Username"],
+                student["Maths"],
+                student["Physics"],
+                student["Chemistry"],
+                student["English"],
+                student["Nepali"],
+                student["Total"],
+                f"{student['Percentage']}%",
+                student["GPA"],
+                student["Grade"]
+            ])
+        
+        # Add scrollbar
+
+
+        self.tree.pack(fill="both", expand=True, padx=10, pady=10)
+
+        tk.Button(self.root, text="Back", command=self.show_course_dashboard).pack(pady=10)
+
+    
+    def calculate_grade(self, percentage):
+        if percentage >= 90:return "A+"
+        elif percentage >= 80:return "A"
+        elif percentage >= 70:return "B+"
+        elif percentage >= 60:return "B"
+        elif percentage >= 50:return "C+"
+        elif percentage >= 40:return "C"
+        elif percentage >= 30:return "D"
+        else: return "F"
+
 
     def edit_courses(self):
 
@@ -175,9 +295,7 @@ class CourseManager:
             messagebox.showinfo("Success", "Marks saved successfully to marks.csv!")
         
         except Exception as e:
-            messagebox.showerror("Errr", f"Failed to save marks: {str(e)}")
-
-        
+            messagebox.showerror("Error", f"Failed to save marks: {str(e)}")
 
 def show_course_screen(root, return_to_dashboard):
     CourseManager(root, return_to_dashboard)
