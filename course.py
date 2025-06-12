@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import ttk 
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 import csv
 
@@ -21,6 +24,7 @@ class CourseManager:
         tk.Label(self.root, text="Manage Courses", font=("Arial", 14)).pack(pady=20)
         tk.Button(self.root, text="View Courses", command=self.view_courses).pack(pady=10)
         tk.Button(self.root, text="Edit Courses", command=self.edit_courses).pack(pady=10)
+        tk.Button(self.root, text="View Statistics", command=self.view_statistics).pack(pady=10)
 
         tk.Button(self.root, text="Back", command=self.return_to_dashboard).pack(pady=10)
 
@@ -297,5 +301,104 @@ class CourseManager:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save marks: {str(e)}")
 
+    def view_statistics(self):
+        self.clear_window()
+        self.root.geometry("1000x800")
+        
+        tk.Label(self.root, text="Performance Statistics", font=("Arial", 14)).pack(pady=10)
+        
+        # Load and process the data
+        marks_data = self.load_existing_marks()
+        if not marks_data:
+            messagebox.showinfo("Info", "No marks data available to display statistics")
+            self.show_course_dashboard()
+            return
+        
+        # Convert to DataFrame
+        df = pd.DataFrame.from_dict(marks_data, orient='index')
+        
+        # Convert marks to numeric (ignore non-numeric values)
+        subjects = ["Maths", "Physics", "Chemistry", "English", "Nepali"]
+        for subject in subjects:
+            df[subject] = pd.to_numeric(df[subject], errors='coerce')
+        
+        # Calculate additional metrics
+        df['Total'] = df[subjects].sum(axis=1)
+        df['Percentage'] = (df['Total'] / (len(subjects) * 100)) * 100
+        df['Grade'] = df['Percentage'].apply(self.calculate_grade)
+        
+        # Create a frame for the plots
+        plot_frame = tk.Frame(self.root)
+        plot_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Create a notebook for multiple tabs
+        notebook = ttk.Notebook(plot_frame)
+        notebook.pack(fill=tk.BOTH, expand=True)
+        
+        # 1. Subject-wise Average Marks
+        tab1 = ttk.Frame(notebook)
+        notebook.add(tab1, text="Subject Averages")
+        
+        fig1, ax1 = plt.subplots(figsize=(8, 5))
+        subject_means = df[subjects].mean()  # This returns a Series
+        subject_means.plot(kind='bar', ax=ax1, color='skyblue')
+        ax1.set_title('Average Marks per Subject')
+        ax1.set_ylabel('Marks')
+        ax1.set_ylim(0, 100)
+        
+        canvas1 = FigureCanvasTkAgg(fig1, master=tab1)
+        canvas1.draw()
+        canvas1.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        # 2. Grade Distribution
+        tab2 = ttk.Frame(notebook)
+        notebook.add(tab2, text="Grade Distribution")
+        
+        fig2, ax2 = plt.subplots(figsize=(8, 5))
+        grade_counts = df['Grade'].value_counts()
+        # Sort grades in a meaningful order (A+, A, B+, etc.)
+        grade_order = ['A+', 'A', 'B+', 'B', 'C+', 'C', 'D', 'F']
+        grade_counts = grade_counts.reindex(grade_order, fill_value=0)
+        grade_counts.plot(kind='bar', ax=ax2, color='lightgreen')
+        ax2.set_title('Grade Distribution')
+        ax2.set_xlabel('Grade')
+        ax2.set_ylabel('Number of Students')
+        
+        canvas2 = FigureCanvasTkAgg(fig2, master=tab2)
+        canvas2.draw()
+        canvas2.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        # 3. Subject Comparison (Boxplot)
+        tab3 = ttk.Frame(notebook)
+        notebook.add(tab3, text="Subject Comparison")
+        
+        fig3, ax3 = plt.subplots(figsize=(8, 5))
+        df[subjects].boxplot(ax=ax3)
+        ax3.set_title('Subject-wise Marks Distribution')
+        ax3.set_ylabel('Marks')
+        ax3.set_ylim(0, 100)
+        
+        canvas3 = FigureCanvasTkAgg(fig3, master=tab3)
+        canvas3.draw()
+        canvas3.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        # 4. Top Performers
+        tab4 = ttk.Frame(notebook)
+        notebook.add(tab4, text="Top Performers")
+        
+        top_students = df.nlargest(5, 'Percentage')
+        fig4, ax4 = plt.subplots(figsize=(8, 5))
+        top_students.plot(x='Username', y='Percentage', kind='bar', ax=ax4, color='gold')
+        ax4.set_title('Top 5 Students by Percentage')
+        ax4.set_ylabel('Percentage')
+        ax4.set_ylim(0, 100)
+        
+        canvas4 = FigureCanvasTkAgg(fig4, master=tab4)
+        canvas4.draw()
+        canvas4.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+        
+        # Back button
+        tk.Button(self.root, text="Back", command=self.show_course_dashboard).pack(pady=10)
+            
 def show_course_screen(root, return_to_dashboard):
     CourseManager(root, return_to_dashboard)
