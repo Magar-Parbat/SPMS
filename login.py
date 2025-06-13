@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from admin import AdminDashboard
+from student import StudentDashboard
 import os
 
 def clear_window():
@@ -56,7 +57,8 @@ def login_window():
                             saved_username, fullname, role = [item.strip() for item in user_data]
                             if saved_username == username:
                                 if role == "Student":
-                                    messagebox.showinfo("Login Successful", f"Student dashboard is under development.")
+                                    clear_window()
+                                    student_dashboard = StudentDashboard(root, username)
                                     return
 
                                 else:
