@@ -1,4 +1,4 @@
 Admin,Admin,Admin
 Parbat,Parbat Magar,Student
 Sayana,Sayana tamang,Student
-Tshering,Tshering Sherpa,Student
+Tshering,Tshering Palden Sherpa,Student
