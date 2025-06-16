@@ -88,7 +88,7 @@ class CourseManager:
                     valid_subjects += 1
                     subject_scores[subject] = score
                 except (ValueError, TypeError):
-                    subject_score[subject] = "N/A"
+                    subject_scores[subject] = "N/A"
 
             # Calculate percentage
             percentage = (total/ (valid_subjects * 100)) * 100 if valid_subjects > 0 else 0

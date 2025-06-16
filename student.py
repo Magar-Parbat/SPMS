@@ -114,7 +114,76 @@ class StudentDashboard:
 
     def view_grades(self):
 
-        messagebox.showinfo("View Grades", "This feature is devleoping.")
+        self.clear_window()
+        self.root.geometry("800x600")
+
+        tk.Label(self.root, text="Your Grades", font=("Arial", 14)).pack(pady=20)
+
+        found = False # flag to check if marks found
+
+        try:
+            with open("data/marks.csv","r") as file:
+                headers = file.readline().strip().split(",")
+                subjects = headers[1:]
+
+                for line in file:
+                    data = line.strip().split(",")
+                    if data[0] == self.username:
+                        marks = [int(mark) if mark.isdigit() else 0 for mark in data [1:]]
+                        found = True # marks found
+                        break
+
+            if not found:
+                messagebox.showerror("Error", "No marks found")
+                return
+
+            # Create display frame
+            report_frame = tk.Frame(self.root)
+            report_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+
+            # Dispaly sutdent name
+            tk.Label(report_frame, text=f"Student: {self.username}", font=("Arial", 12)).pack(anchor="center", pady=5)
+
+            # Display each subject marks
+            for subject, mark in zip(subjects, marks):
+                tk.Label(report_frame, text=f" {subject}: {mark}/100", font=("Arial", 11)).pack(anchor="center", pady=5)
+                    
+            # Calcualte marks
+            total = sum(marks)
+            percentage = total / (len(marks) * 100) * 100
+
+            # simpel gpa calculation 
+            gpa = round((percentage / 100) * 4.0, 2)
+
+            # grade calculation
+            def get_grade(pct):
+                if pct >= 90: return 'A+'
+                elif pct >= 80: return 'A'
+                elif pct >= 70: return 'B+'
+                elif pct >= 60: return 'B'
+                elif pct >= 50: return 'C+'
+                elif pct >= 40: return 'C'
+                elif pct >= 30: return 'D'
+                else: return 'NG' 
+            
+            grade = get_grade(percentage)
+
+            # Separator line
+            tk.Frame(report_frame, height=5, bg="gray").pack(fill=tk.X, pady=10)
+
+            # Dispaly calcuations
+            tk.Label(report_frame, text=f"Total Marks: {total}", font=("Arial", 11)).pack(anchor="center", pady=5)
+            tk.Label(report_frame, text=f"Percentage: {percentage:.2f}%", font=("Arial", 11)).pack(anchor="center", pady=5)
+            tk.Label(report_frame, text=f"GPA: {gpa}", font=("Arial", 11)).pack(anchor="center", pady=5)
+            tk.Label(report_frame, text=f"Grade: {grade}", font=("Arial", 11)).pack(anchor="center", pady=5)
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Error: {str(e)}")
+
+        tk.Button(self.root, text="Back to Dashboard", command=self.show_student_dashboard).pack(pady=20)
+
+
+
 
 if __name__ == "__main__":
     root = tk.Tk()
